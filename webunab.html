@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNAB Portal - Sistema de Gestión Estudiantil</title>
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #39FF14; /* Verde fosforescente principal */
+            --secondary-color: #7CFC00; /* Verde fosforescente más claro */
+            --accent-color: #00FF00; /* Verde puro para contraste */
+            --dark-bg: #0A0A0A; /* Fondo oscuro para contraste */
+            --card-bg: #1A1A1A; /* Fondo de tarjetas */
+            --text-light: #FFFFFF;
+            --text-dark: #0A0A0A;
+            --success-color: #39FF14;
+            --warning-color: #FFD700;
+            --danger-color: #FF4444;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Pantalla de inicio de sesión */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(57, 255, 20, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(57, 255, 20, 0.2) 0%, transparent 50%),
+                linear-gradient(var(--dark-bg), var(--dark-bg));
+            background-size: cover;
+            background-position: center;
+            color: var(--text-light);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 
+                0 0 20px rgba(57, 255, 20, 0.3),
+                0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(57, 255, 20, 0.2);
+        }
+
+        .login-logo {
+            margin-bottom: 30px;
+        }
+
+        .login-logo img {
+            height: 80px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px var(--primary-color));
+        }
+
+        .login-logo h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        .login-logo p {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            color: var(--text-light);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.8);
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        /* Header y navegación */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 20px rgba(57, 255, 20, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: none;
+            border-bottom: 1px solid rgba(57, 255, 20, 0.2);
+        }
+
+        .header-top {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-dark);
+            padding: 8px 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .header-top .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-main {
+            padding: 15px 0;
+        }
+
+        .header-main .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo img {
+            height: 50px;
+            filter: drop-shadow(0 0 8px var(--primary-color));
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        /* Sección principal */
+        .hero {
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(57, 255, 20, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(57, 255, 20, 0.15) 0%, transparent 50%),
+                linear-gradient(var(--dark-bg), var(--dark-bg));
+            padding: 100px 0;
+            text-align: center;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(57, 255, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(57, 255, 20, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.7);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: var(--secondary-color);
+        }
+
+        /* Tarjetas de opciones */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 50px 0;
+        }
+
+        .option-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .option-card:hover::before {
+            left: 100%;
+        }
+
+        .option-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(57, 255, 20, 0.3);
+            border-color: rgba(57, 255, 20, 0.3);
+        }
+
+        .option-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+
+        .option-card h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+
+        .option-card p {
+            color: #CCCCCC;
+        }
+
+        /* Secciones de contenido */
+        .content-section {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            padding: 35px;
+            margin: 40px 0;
+            border: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(57, 255, 20, 0.2);
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        /* Perfil de estudiante */
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 35px;
+            margin-bottom: 35px;
+        }
+
+        .profile-image {
+            text-align: center;
+        }
+
+        .profile-image img {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: linear-gradient(145deg, #1E1E1E, #252525);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .info-card p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Actividades */
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .activity-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(57, 255, 20, 0.2);
+        }
+
+        .activity-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-dark);
+            padding: 18px;
+        }
+
+        .activity-body {
+            padding: 20px;
+        }
+
+        .activity-footer {
+            padding: 18px;
+            border-top: 1px solid rgba(57, 255, 20, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .available {
+            background-color: var(--success-color);
+            color: var(--text-dark);
+            box-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+        }
+
+        .full {
+            background-color: var(--danger-color);
+            color: var(--text-light);
+        }
+
+        /* Registros */
+        .registros-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .registro-item {
+            background: linear-gradient(145deg, #1E1E1E, #252525);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .registro-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Noticias */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .news-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(57, 255, 20, 0.2);
+        }
+
+        .news-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .news-content {
+            padding: 20px;
+        }
+
+        /* Trivia */
+        .trivia-container {
+            text-align: center;
+            padding: 35px;
+            background: linear-gradient(145deg, #1E1E1E, #252525);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        .trivia-header {
+            margin-bottom: 30px;
+        }
+
+        .trivia-question {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        .trivia-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .trivia-option {
+            padding: 18px;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .trivia-option:hover {
+            background-color: rgba(57, 255, 20, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .trivia-option.selected {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+
+        .trivia-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .trivia-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            background-color: var(--card-bg);
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        /* Formularios */
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--card-bg);
+            color: var(--text-light);
+            padding: 50px 0 25px;
+            display: none;
+            border-top: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 35px;
+            margin-bottom: 35px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 18px;
+            color: var(--primary-color);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #CCCCCC;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 25px;
+            border-top: 1px solid rgba(57, 255, 20, 0.1);
+            color: var(--secondary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-main .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-image {
+                text-align: center;
+            }
+
+            .trivia-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h2 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de inicio de sesión -->
+    <section class="login-screen" id="login-screen">
+        <div class="login-container">
+            <div class="login-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Universidad_Aut%C3%B3noma_de_Bucaramanga_logo.svg/1200px-Universidad_Aut%C3%B3noma_de_Bucaramanga_logo.svg.png" alt="Logo UNAB">
+                <h1>Universidad Autónoma de Bucaramanga</h1>
+                <p>Bienvenido al portal UNAB</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Usuario UNAB</label>
+                    <input type="text" id="login-username" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Acceder</button>
+            </form>
+            
+            <div class="login-footer">
+                <p>© 2025 UNAB – Portal Estudiantil</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Header -->
+    <header id="main-header">
+        <div class="header-top">
+            <div class="container">
+                <div>Universidad Autónoma de Bucaramanga</div>
+                <div>Tel: (607) 643 6111</div>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="container">
+                <div class="logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Universidad_Aut%C3%B3noma_de_Bucaramanga_logo.svg/1200px-Universidad_Aut%C3%B3noma_de_Bucaramanga_logo.svg.png" alt="Logo UNAB">
+                    <h1>UNAB Portal</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-section="inicio">Inicio</a></li>
+                        <li><a href="#" class="nav-link" data-section="perfil">Perfil</a></li>
+                        <li><a href="#" class="nav-link" data-section="registros">Registros</a></li>
+                        <li><a href="#" class="nav-link" data-section="actividades">Actividades</a></li>
+                        <li><a href="#" class="nav-link" data-section="noticias">Noticias</a></li>
+                        <li><a href="#" class="nav-link" data-section="trivia">Trivia</a></li>
+                        <li><a href="#" class="nav-link" data-section="buzon">Buzón</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                    <button class="btn btn-outline" id="logout-btn">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="main-hero">
+        <div class="container">
+            <h2>Bienvenido a tu Portal Estudiantil UNAB</h2>
+            <p>Sistema de Gestión Estudiantil integral para administrar tu vida académica</p>
+        </div>
+    </section>
+
+    <!-- Contenido Principal -->
+    <main class="container" id="main-content">
+        <!-- Sección Inicio -->
+        <section id="inicio" class="content-section active">
+            <div class="section-header">
+                <h2>Hola, Juan Sebastián Pérez García</h2>
+                <div class="stats">
+                    <div class="info-card">
+                        <h4>Horas Libres Completadas</h4>
+                        <p>12/180 horas</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="options-grid">
+                <div class="option-card" data-section="perfil">
+                    <i>👤</i>
+                    <h3>Mi Perfil</h3>
+                    <p>Consulta tu información personal y académica</p>
+                </div>
+                <div class="option-card" data-section="registros">
+                    <i>📋</i>
+                    <h3>Mis Registros</h3>
+                    <p>Revisa tus inscripciones activas en diferentes lugares</p>
+                </div>
+                <div class="option-card">
+                    <i>📚</i>
+                    <h3>Mis Cursos</h3>
+                    <p>Consulta tus materias y horarios académicos</p>
+                </div>
+                <div class="option-card" data-section="actividades">
+                    <i>🏛️</i>
+                    <h3>Lugares Campus</h3>
+                    <p>Explora los lugares donde puedes obtener horas libres</p>
+                </div>
+                <div class="option-card">
+                    <i>📊</i>
+                    <h3>Notas</h3>
+                    <p>Revisa tu rendimiento académico</p>
+                </div>
+                <div class="option-card">
+                    <i>📅</i>
+                    <h3>Horarios</h3>
+                    <p>Visualiza tu calendario de clases</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Perfil -->
+        <section id="perfil" class="content-section">
+            <div class="section-header">
+                <h2>Perfil del Estudiante</h2>
+            </div>
+            
+            <div class="profile-info">
+                <div class="profile-image">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Foto de perfil">
+                    <h3>Juan Sebastián Pérez García</h3>
+                    <p>Código: U00123456</p>
+                    <p>Ingeniería de Sistemas</p>
+                    <p>j.perez@unab.edu.co</p>
+                </div>
+                <div class="profile-details">
+                    <div class="info-card">
+                        <h4>Horas Libres Completadas</h4>
+                        <p>12/180 horas</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Semestre Actual</h4>
+                        <p>2º semestre</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Promedio Acumulado</h4>
+                        <p>4.2</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Créditos Cursados</h4>
+                        <p>17/151</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Estado Académico</h4>
+                        <p>Activo</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Campus</h4>
+                        <p>El Jardín</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Actividades -->
+        <section id="actividades" class="content-section">
+            <div class="section-header">
+                <h2>Actividades para Horas Libres Disponibles</h2>
+            </div>
+            
+            <div class="activities-grid">
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <h3>Gimnasio UNAB</h3>
+                        <p>Realiza actividad física y suma horas libres mientras cuidas tu salud</p>
+                    </div>
+                    <div class="activity-body">
+                        <p><strong>Horario:</strong> 6:00 AM - 8:00 PM</p>
+                        <p><strong>Campus:</strong> Principal</p>
+                        <p><strong>HL por visita:</strong> 2 horas</p>
+                    </div>
+                    <div class="activity-footer">
+                        <span class="status available">Disponible</span>
+                        <button class="btn btn-primary">Registrarse</button>
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <h3>Cafetería Casona</h3>
+                        <p>Apoya en labores voluntarias de cafetería y servicio al cliente</p>
+                    </div>
+                    <div class="activity-body">
+                        <p><strong>Horario:</strong> 7:00 AM - 5:00 PM</p>
+                        <p><strong>Campus:</strong> La Casona</p>
+                        <p><strong>HL por visita:</strong> 3 horas</p>
+                    </div>
+                    <div class="activity-footer">
+                        <span class="status available">Disponible</span>
+                        <button class="btn btn-primary">Registrarse</button>
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <h3>Cafetería El Bosque</h3>
+                        <p>Participa en actividades de sostenibilidad ambiental</p>
+                    </div>
+                    <div class="activity-body">
+                        <p><strong>Horario:</strong> 7:00 AM - 6:00 PM</p>
+                        <p><strong>Campus:</strong> El Bosque</p>
+                        <p><strong>HL por visita:</strong> 2 horas</p>
+                    </div>
+                    <div class="activity-footer">
+                        <span class="status full">Lleno</span>
+                        <button class="btn btn-outline" disabled>No disponible</button>
+                    </div>
+                </div>
+                
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <h3>Biblioteca Banu</h3>
+                        <p>Asiste en organización y préstamo de material bibliográfico</p>
+                    </div>
+                    <div class="activity-body">
+                        <p><strong>Horario:</strong> 7:00 AM - 9:00 PM</p>
+                        <p><strong>Campus:</strong> Principal</p>
+                        <p><strong>HL por visita:</strong> 2 horas</p>
+                    </div>
+                    <div class="activity-footer">
+                        <span class="status available">Disponible</span>
+                        <button class="btn btn-primary">Registrarse</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Registros -->
+        <section id="registros" class="content-section">
+            <div class="section-header">
+                <h2>Mis Registros</h2>
+            </div>
+            
+            <div class="registros-list">
+                <div class="registro-item">
+                    <h3>Gimnasio UNAB</h3>
+                    <p><strong>Fecha de registro:</strong> 25/10/2024 - 10:30 AM</p>
+                    <p><strong>Hora a obtener:</strong> 2 horas</p>
+                    <p><strong>Campus:</strong> Principal</p>
+                </div>
+                
+                <div class="registro-item">
+                    <h3>Biblioteca Banu</h3>
+                    <p><strong>Fecha de registro:</strong> 23/10/2024 - 02:15 PM</p>
+                    <p><strong>Hora a obtener:</strong> 2 horas</p>
+                    <p><strong>Campus:</strong> Principal</p>
+                </div>
+                
+                <div class="registro-item">
+                    <h3>Cafetería Casona</h3>
+                    <p><strong>Fecha de registro:</strong> 20/10/2024 - 09:00 AM</p>
+                    <p><strong>Hora a obtener:</strong> 3 horas</p>
+                    <p><strong>Campus:</strong> La Casona</p>
+                </div>
+            </div>
+            
+            <div class="info-card" style="margin-top: 20px;">
+                <p><strong>Recuerda:</strong> Asistir puntualmente a tus registros para que las horas libres sean validadas correctamente.</p>
+            </div>
+        </section>
+
+        <!-- Sección Noticias -->
+        <section id="noticias" class="content-section">
+            <div class="section-header">
+                <h2>Noticias UNAB</h2>
+            </div>
+            
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-image" style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                    <div class="news-content">
+                        <h3>Nuevo Programa de Becas</h3>
+                        <p>Convocatorias abiertas para nuevas estudiantes de primer ingreso...</p>
+                        <button class="btn btn-primary" style="margin-top: 10px;">Leer más</button>
+                    </div>
+                </div>
+                
+                <div class="news-card">
+                    <div class="news-image" style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                    <div class="news-content">
+                        <h3>Trivia UNAB - Gana Premios</h3>
+                        <p>Participa en nuestro juego sobre la historia de la UNAB...</p>
+                        <button class="btn btn-primary" style="margin-top: 10px;">Leer más</button>
+                    </div>
+                </div>
+                
+                <div class="news-card">
+                    <div class="news-image" style="background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                    <div class="news-content">
+                        <h3>Jornada de Salud este Viernes</h3>
+                        <p>Vacunación y chequeos médicos gratuitos en el campus...</p>
+                        <button class="btn btn-primary" style="margin-top: 10px;">Leer más</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Trivia -->
+        <section id="trivia" class="content-section">
+            <div class="section-header">
+                <h2>Trivia UNAB</h2>
+            </div>
+            
+            <div class="trivia-container">
+                <div class="trivia-header">
+                    <h3>Juego del Día</h3>
+                    <p>Responde correctamente y gana puntos</p>
+                </div>
+                
+                <div class="trivia-question">
+                    <p>¿En qué año fue fundada la Universidad Autónoma de Bucaramanga?</p>
+                </div>
+                
+                <div class="trivia-options">
+                    <div class="trivia-option" data-correct="false">1952</div>
+                    <div class="trivia-option" data-correct="true">1954</div>
+                    <div class="trivia-option" data-correct="false">1965</div>
+                    <div class="trivia-option" data-correct="false">1978</div>
+                </div>
+                
+                <div class="trivia-footer">
+                    <div class="trivia-stats">
+                        <div class="stat">
+                            <strong>Puntos:</strong> 150
+                        </div>
+                        <div class="stat">
+                            <strong>Racha:</strong> 3 días
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="submit-trivia">Enviar Respuesta</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Buzón -->
+        <section id="buzon" class="content-section">
+            <div class="section-header">
+                <h2>Buzón de Comentarios UNAB</h2>
+            </div>
+            
+            <div class="form-container">
+                <form id="feedback-form">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mensaje">Mensaje</label>
+                        <textarea id="mensaje" class="form-control" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>UNAB Portal</h3>
+                    <p>Sistema de Gestión Estudiantil</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="#" class="nav-link" data-section="inicio">Inicio</a></li>
+                        <li><a href="#" class="nav-link" data-section="actividades">Lugares</a></li>
+                        <li><a href="#" class="nav-link" data-section="noticias">Noticias</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p>info@unab.edu.co</p>
+                    <p>Tel: (607) 643 6111</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Campus</h3>
+                    <p>Campus Principal</p>
+                    <p>Bucaramanga, Colombia</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Universidad Autónoma de Bucaramanga. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Manejo del inicio de sesión
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simular inicio de sesión exitoso
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (username && password) {
+                // Ocultar pantalla de login
+                document.getElementById('login-screen').style.display = 'none';
+                
+                // Mostrar contenido principal
+                document.getElementById('main-header').style.display = 'block';
+                document.getElementById('main-hero').style.display = 'block';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('main-footer').style.display = 'block';
+            }
+        });
+
+        // Cerrar sesión
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            // Mostrar pantalla de login
+            document.getElementById('login-screen').style.display = 'flex';
+            
+            // Ocultar contenido principal
+            document.getElementById('main-header').style.display = 'none';
+            document.getElementById('main-hero').style.display = 'none';
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('main-footer').style.display = 'none';
+            
+            // Limpiar formulario de login
+            document.getElementById('login-form').reset();
+        });
+
+        // Navegación entre secciones
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remover clase activa de todos los enlaces
+                document.querySelectorAll('.nav-link').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Agregar clase activa al enlace clickeado
+                this.classList.add('active');
+                
+                // Ocultar todas las secciones
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Mostrar la sección correspondiente
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        // Navegación desde las tarjetas de opciones
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                if (sectionId) {
+                    // Remover clase activa de todos los enlaces
+                    document.querySelectorAll('.nav-link').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Agregar clase activa al enlace correspondiente
+                    document.querySelector(`.nav-link[data-section="${sectionId}"]`).classList.add('active');
+                    
+                    // Ocultar todas las secciones
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    // Mostrar la sección correspondiente
+                    document.getElementById(sectionId).classList.add('active');
+                }
+            });
+        });
+
+        // Funcionalidad de trivia
+        document.querySelectorAll('.trivia-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remover selección previa
+                document.querySelectorAll('.trivia-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Seleccionar esta opción
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('submit-trivia').addEventListener('click', function() {
+            const selectedOption = document.querySelector('.trivia-option.selected');
+            
+            if (!selectedOption) {
+                alert('Por favor selecciona una respuesta');
+                return;
+            }
+            
+            const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
+            
+            if (isCorrect) {
+                alert('¡Respuesta correcta! Has ganado 10 puntos.');
+            } else {
+                alert('Respuesta incorrecta. La respuesta correcta es: 1954');
+            }
+            
+            // Reiniciar selección
+            document.querySelectorAll('.trivia-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+        });
+
+        // Manejo de formularios
+        document.getElementById('feedback-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Mensaje enviado correctamente');
+            this.reset();
+        });
+    </script>
+</body>
+</html>
