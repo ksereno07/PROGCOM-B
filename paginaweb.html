@@ -1,0 +1,467 @@
+import React, { useState } from 'react';
+import { Palette, Info, Calculator, Lightbulb, Grid3x3 } from 'lucide-react';
+
+export default function ProfessionalColoringAssistant() {
+  const [baseColor, setBaseColor] = useState({ r: 255, g: 100, b: 100 });
+  const [showTheory, setShowTheory] = useState(false);
+  const [showMatrix, setShowMatrix] = useState(true);
+
+  // Convertir RGB a HSL
+  const rgbToHsl = (r, g, b) => {
+    r /= 255; 
+    g /= 255; 
+    b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    
+    let h = 0;
+    if (delta !== 0) {
+      if (max === r) h = 60 * (((g - b) / delta) % 6);
+      else if (max === g) h = 60 * (((b - r) / delta) + 2);
+      else h = 60 * (((r - g) / delta) + 4);
+    }
+    if (h < 0) h += 360;
+    
+    const l = (max + min) / 2;
+    const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    
+    return { h, s, l };
+  };
+
+  // Convertir HSL a RGB
+  const hslToRgb = (h, s, l) => {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    
+    let r, g, b;
+    if (h < 60) [r, g, b] = [c, x, 0];
+    else if (h < 120) [r, g, b] = [x, c, 0];
+    else if (h < 180) [r, g, b] = [0, c, x];
+    else if (h < 240) [r, g, b] = [0, x, c];
+    else if (h < 300) [r, g, b] = [x, 0, c];
+    else [r, g, b] = [c, 0, x];
+    
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255)
+    };
+  };
+
+  // Matriz de transformación de brillo
+  const applyBrightnessMatrix = (r, g, b, delta) => {
+    return {
+      r: Math.round(Math.max(0, Math.min(255, r + delta))),
+      g: Math.round(Math.max(0, Math.min(255, g + delta))),
+      b: Math.round(Math.max(0, Math.min(255, b + delta)))
+    };
+  };
+
+  // Matriz de transformación de saturación
+  const applySaturationMatrix = (r, g, b, factor) => {
+    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+    
+    return {
+      r: Math.round(Math.max(0, Math.min(255, gray + factor * (r - gray)))),
+      g: Math.round(Math.max(0, Math.min(255, gray + factor * (g - gray)))),
+      b: Math.round(Math.max(0, Math.min(255, gray + factor * (b - gray))))
+    };
+  };
+
+  // Combinación lineal de colores
+  const mixColors = (c1, c2, alpha) => {
+    return {
+      r: Math.round(alpha * c1.r + (1 - alpha) * c2.r),
+      g: Math.round(alpha * c1.g + (1 - alpha) * c2.g),
+      b: Math.round(alpha * c1.b + (1 - alpha) * c2.b)
+    };
+  };
+
+  // MATRIZ 5x5 DE COLORES
+  const generateColorMatrix = () => {
+    const hsl = rgbToHsl(baseColor.r, baseColor.g, baseColor.b);
+    const matrix = [];
+    
+    const hueOffsets = [0, 30, -30, 120, 180];
+    const hueLabels = ['Base', 'Cálido (+30°)', 'Frío (-30°)', 'Triádico', 'Complementario'];
+    
+    hueOffsets.forEach((hueOffset, rowIdx) => {
+      const row = [];
+      const newHue = (hsl.h + hueOffset + 360) % 360;
+      
+      const luminosities = [0.9, 0.7, 0.5, 0.3, 0.15];
+      const lumLabels = ['Muy Claro', 'Claro', 'Medio', 'Oscuro', 'Muy Oscuro'];
+      
+      luminosities.forEach((lum, colIdx) => {
+        const color = hslToRgb(newHue, hsl.s, lum);
+        row.push({
+          color,
+          label: rowIdx === 0 && colIdx === 2 ? 'BASE' : '',
+          rowLabel: hueLabels[rowIdx],
+          colLabel: lumLabels[colIdx]
+        });
+      });
+      
+      matrix.push(row);
+    });
+    
+    return matrix;
+  };
+
+  // Generar variaciones usando matrices
+  const generateMatrixVariations = () => {
+    const variations = [];
+    
+    // Variaciones de brillo
+    for (let i = -60; i <= 60; i += 30) {
+      if (i === 0) continue;
+      variations.push({
+        color: applyBrightnessMatrix(baseColor.r, baseColor.g, baseColor.b, i),
+        label: i > 0 ? `+${i} brillo` : `${i} brillo`,
+        type: 'brightness'
+      });
+    }
+    
+    // Variaciones de saturación
+    for (let factor of [0.3, 0.6, 1.4, 1.8]) {
+      if (factor === 1) continue;
+      variations.push({
+        color: applySaturationMatrix(baseColor.r, baseColor.g, baseColor.b, factor),
+        label: `Sat x${factor}`,
+        type: 'saturation'
+      });
+    }
+    
+    // Mezclas
+    const white = {r: 255, g: 255, b: 255};
+    const black = {r: 0, g: 0, b: 0};
+    
+    for (let alpha of [0.7, 0.5, 0.3]) {
+      variations.push({
+        color: mixColors(baseColor, white, alpha),
+        label: `${Math.round(alpha*100)}% base + blanco`,
+        type: 'mix-white'
+      });
+      variations.push({
+        color: mixColors(baseColor, black, alpha),
+        label: `${Math.round(alpha*100)}% base + negro`,
+        type: 'mix-black'
+      });
+    }
+    
+    return variations;
+  };
+
+  const colorMatrix = generateColorMatrix();
+  const matrixVariations = generateMatrixVariations();
+  const hsl = rgbToHsl(baseColor.r, baseColor.g, baseColor.b);
+
+  const ColorBox = ({ color, label, description, isBase }) => (
+    <div className="space-y-1">
+      <div
+        className={`h-12 rounded shadow-md cursor-pointer hover:scale-105 transition-transform ${
+          isBase ? 'border-4 border-yellow-400' : 'border-2 border-gray-200'
+        }`}
+        style={{backgroundColor: `rgb(${color.r}, ${color.g}, ${color.b})`}}
+        title={`RGB(${color.r}, ${color.g}, ${color.b})`}
+      />
+      {label && <p className="text-xs font-semibold text-gray-700 text-center">{label}</p>}
+      {description && <p className="text-xs text-gray-500 text-center">{description}</p>}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Palette className="w-8 h-8 text-indigo-600" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              Asistente de Coloreado con Matrices
+            </h1>
+          </div>
+          <p className="text-gray-600 text-sm">
+            Proyecto de Álgebra Lineal - Ingeniería de Sistemas 2025-1
+          </p>
+          <p className="text-gray-500 text-xs mt-1">
+            Transformaciones matriciales aplicadas a espacios de color RGB y HSL
+          </p>
+        </div>
+
+        {/* Input Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Calculator className="w-5 h-5" />
+            Selecciona tu Color Base
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Valores RGB (Vector en R³)</label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="text-xs text-gray-500">R</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={baseColor.r}
+                    onChange={(e) => setBaseColor({...baseColor, r: parseInt(e.target.value) || 0})}
+                    className="w-full border rounded px-2 py-1 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">G</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={baseColor.g}
+                    onChange={(e) => setBaseColor({...baseColor, g: parseInt(e.target.value) || 0})}
+                    className="w-full border rounded px-2 py-1 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">B</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={baseColor.b}
+                    onChange={(e) => setBaseColor({...baseColor, b: parseInt(e.target.value) || 0})}
+                    className="w-full border rounded px-2 py-1 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="mt-2 text-xs font-mono text-gray-600 bg-gray-50 p-2 rounded">
+                Vector: ({baseColor.r}, {baseColor.g}, {baseColor.b})
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Valores HSL</label>
+              <div className="bg-blue-50 p-3 rounded text-sm">
+                <p className="text-blue-800">Matiz: {hsl.h.toFixed(1)}°</p>
+                <p className="text-blue-800">Saturación: {(hsl.s * 100).toFixed(1)}%</p>
+                <p className="text-blue-800">Luminosidad: {(hsl.l * 100).toFixed(1)}%</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Color Base</label>
+              <div 
+                className="h-24 rounded-lg border-4 border-gray-300 shadow-inner"
+                style={{backgroundColor: `rgb(${baseColor.r}, ${baseColor.g}, ${baseColor.b})`}}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* MATRIZ 5x5 DE COLORES */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Grid3x3 className="w-5 h-5 text-purple-600" />
+              Matriz de Paleta 5×5 (Matiz × Luminosidad)
+            </h2>
+            <button
+              onClick={() => setShowMatrix(!showMatrix)}
+              className="text-sm text-purple-600 hover:text-purple-800"
+            >
+              {showMatrix ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
+
+          {showMatrix && (
+            <>
+              <div className="bg-purple-50 p-3 rounded-lg mb-4 text-sm">
+                <p className="font-semibold text-purple-900 mb-1">💡 Cómo usar esta matriz:</p>
+                <p className="text-purple-800">
+                  <strong>Filas:</strong> Diferentes matices (rotaciones en la rueda de color) • 
+                  <strong> Columnas:</strong> Diferentes luminosidades (de claro a oscuro) • 
+                  El color marcado es tu BASE
+                </p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border border-gray-300 p-2 bg-gray-100 text-xs">Matiz / Lum</th>
+                      {['Muy Claro', 'Claro', 'Medio', 'Oscuro', 'Muy Oscuro'].map((label, i) => (
+                        <th key={i} className="border border-gray-300 p-2 bg-gray-100 text-xs">{label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {colorMatrix.map((row, rowIdx) => (
+                      <tr key={rowIdx}>
+                        <td className="border border-gray-300 p-2 bg-gray-100 text-xs font-semibold">
+                          {row[0].rowLabel}
+                        </td>
+                        {row.map((cell, colIdx) => (
+                          <td key={colIdx} className="border border-gray-300 p-1">
+                            <div
+                              className={`h-16 rounded cursor-pointer hover:scale-105 transition-transform flex items-center justify-center ${
+                                cell.label === 'BASE' ? 'border-4 border-yellow-400' : ''
+                              }`}
+                              style={{backgroundColor: `rgb(${cell.color.r}, ${cell.color.g}, ${cell.color.b})`}}
+                              title={`RGB(${cell.color.r}, ${cell.color.g}, ${cell.color.b})`}
+                            >
+                              {cell.label && (
+                                <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-bold">
+                                  {cell.label}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 bg-amber-50 p-3 rounded-lg">
+                <p className="text-sm text-amber-900 font-medium">📐 Operaciones Matriciales:</p>
+                <ul className="text-xs text-amber-800 mt-2 space-y-1">
+                  <li>• <strong>Filas:</strong> Rotación de matiz con ángulos en grados (0°, 30°, -30°, 120°, 180°)</li>
+                  <li>• <strong>Columnas:</strong> Transformación lineal de luminosidad</li>
+                  <li>• <strong>Cada celda:</strong> Resultado de aplicar las transformaciones al color base</li>
+                </ul>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Variaciones con Matrices */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-green-600" />
+            Transformaciones Matriciales Aplicadas
+          </h2>
+
+          <div className="space-y-6">
+            {/* Brillo */}
+            <div>
+              <h3 className="font-semibold text-sm mb-2 text-gray-700">
+                1. Matriz de Brillo (Translación)
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {matrixVariations.filter(v => v.type === 'brightness').map((v, i) => (
+                  <ColorBox key={i} color={v.color} label={v.label} />
+                ))}
+              </div>
+            </div>
+
+            {/* Saturación */}
+            <div>
+              <h3 className="font-semibold text-sm mb-2 text-gray-700">
+                2. Matriz de Saturación (Escalado hacia gris)
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {matrixVariations.filter(v => v.type === 'saturation').map((v, i) => (
+                  <ColorBox key={i} color={v.color} label={v.label} />
+                ))}
+              </div>
+            </div>
+
+            {/* Mezclas */}
+            <div>
+              <h3 className="font-semibold text-sm mb-2 text-gray-700">
+                3. Combinación Lineal (Mezclas con blanco y negro)
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {matrixVariations.filter(v => v.type === 'mix-white').slice(0, 3).map((v, i) => (
+                  <ColorBox key={i} color={v.color} label={v.label} />
+                ))}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                {matrixVariations.filter(v => v.type === 'mix-black').slice(0, 3).map((v, i) => (
+                  <ColorBox key={i} color={v.color} label={v.label} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 bg-green-50 p-4 rounded-lg">
+            <p className="text-sm text-green-900 font-medium flex items-center gap-2">
+              <Lightbulb className="w-4 h-4" />
+              Uso Profesional:
+            </p>
+            <p className="text-sm text-green-800 mt-1">
+              Estas transformaciones te permiten generar variaciones precisas. Usa las mezclas con blanco 
+              para highlights, con negro para sombras profundas, y las variaciones de brillo para transiciones suaves.
+            </p>
+          </div>
+        </div>
+
+        {/* Theory Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <button
+            onClick={() => setShowTheory(!showTheory)}
+            className="flex items-center gap-2 text-lg font-semibold text-indigo-700 hover:text-indigo-900"
+          >
+            <Info className="w-5 h-5" />
+            Fundamentos Matemáticos (Álgebra Lineal y Matrices)
+          </button>
+          
+          {showTheory && (
+            <div className="mt-4 space-y-4 text-sm text-gray-700">
+              <div className="bg-gray-50 p-4 rounded">
+                <h3 className="font-bold text-base mb-2">1. Espacio Vectorial RGB</h3>
+                <p className="mb-2">Cada color es un vector en R³:</p>
+                <div className="font-mono text-xs bg-white p-3 rounded">
+                  c = (r, g, b) donde r, g, b en [0, 255]
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded">
+                <h3 className="font-bold text-base mb-2">2. Matriz de Brillo</h3>
+                <p className="mb-2">Suma de un vector constante:</p>
+                <div className="font-mono text-xs bg-white p-3 rounded">
+                  c' = c + Delta * [1, 1, 1]
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded">
+                <h3 className="font-bold text-base mb-2">3. Matriz de Saturación</h3>
+                <p className="mb-2">Escalado hacia el gris:</p>
+                <div className="font-mono text-xs bg-white p-3 rounded">
+                  gray = 0.299*R + 0.587*G + 0.114*B<br/>
+                  c' = gray + k*(c - gray)
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded">
+                <h3 className="font-bold text-base mb-2">4. Combinación Lineal</h3>
+                <p className="mb-2">Mezcla de dos vectores:</p>
+                <div className="font-mono text-xs bg-white p-3 rounded">
+                  c' = alpha*c1 + (1-alpha)*c2
+                </div>
+              </div>
+
+              <div className="bg-indigo-50 p-4 rounded border-2 border-indigo-200">
+                <p className="font-bold text-indigo-900 mb-2">🎨 Aplicación Práctica:</p>
+                <p className="text-indigo-800 text-xs">
+                  Las matrices permiten transformaciones consistentes. Los artistas pueden generar paletas 
+                  completas, ajustar saturación de forma predecible, crear variaciones tonales uniformes 
+                  y mezclar colores matemáticamente para obtener resultados profesionales.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-6 text-gray-500 text-sm">
+          <p>Desarrollado por: [Tu Nombre] - Ingeniería de Sistemas</p>
+          <p className="text-xs mt-1">Curso: Álgebra Lineal | Semestre 2025-1</p>
+        </div>
+      </div>
+    </div>
+  );
+}
